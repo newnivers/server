@@ -12,6 +12,7 @@ class User(AbstractBaseUser):
         verbose_name=_("nickname"),
         max_length=31,
         validators=[UnicodeUsernameValidator()],
+        unique=True,
     )
     social_id = models.CharField(verbose_name=_("social id"), max_length=31)
     is_admin = models.BooleanField(verbose_name=_("admin status"), default=False)
