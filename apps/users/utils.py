@@ -1,5 +1,6 @@
 import requests
 
+from apps.users.models import User
 from config import settings
 
 
@@ -19,3 +20,7 @@ def get_naver_user_info(access_token: str):
     ).json()
     message = response.get("message", "failed")
     return response["response"] if message == "success" else None
+
+
+def check_duplicate_nickname(nickname: str):
+    return User.objects.filter(nickname=nickname).exists()

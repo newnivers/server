@@ -17,6 +17,7 @@ class JsonWebTokenMiddleWare(object):
         try:
             if (
                 request.path != "/api/users/auth/naver"
+                and request.path != "/api/users/check-nickname"
                 and "admin" not in request.path
                 and "swagger" not in request.path
             ):
