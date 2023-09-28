@@ -18,6 +18,7 @@ from apps.users.utils import (
 class UserViewSet(
     mixins.RetrieveModelMixin,
     mixins.DestroyModelMixin,
+    mixins.UpdateModelMixin,
     GenericViewSet,
 ):
     queryset = User.objects.all()
@@ -37,6 +38,32 @@ class UserViewSet(
     )
     def retrieve(self, request, *args, **kwargs):
         return super().retrieve(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_summary="User 수정 API",
+        manual_parameters=[
+            openapi.Parameter(
+                "Authorization",
+                openapi.IN_HEADER,
+                description="accesstoken은 필수입니다.",
+                type=openapi.TYPE_STRING,
+                required=True,
+            )
+        ],
+    )
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop("partial", False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        if getattr(instance, "_prefetched_objects_cache", None):
+            # If 'prefetch_related' has been applied to a queryset, we need to
+            # forcibly invalidate the prefetch cache on the instance.
+            instance._prefetched_objects_cache = {}
+
+        return Response(serializer.data)
 
     @swagger_auto_schema(
         operation_summary="계정 삭제 API",
