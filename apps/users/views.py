@@ -17,6 +17,7 @@ from apps.users.utils import (
 
 class UserViewSet(
     mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin,
     GenericViewSet,
 ):
     queryset = User.objects.all()
@@ -36,6 +37,27 @@ class UserViewSet(
     )
     def retrieve(self, request, *args, **kwargs):
         return super().retrieve(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_summary="계정 삭제 API",
+        manual_parameters=[
+            openapi.Parameter(
+                "Authorization",
+                openapi.IN_HEADER,
+                description="accesstoken은 필수입니다.",
+                type=openapi.TYPE_STRING,
+                required=True,
+            )
+        ],
+    )
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def perform_destroy(self, instance):
+        instance.is_deleted = True
+        instance.save(update_fields=["is_deleted"])
 
     @swagger_auto_schema(
         operation_summary="네이버 로그인 API",

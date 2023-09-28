@@ -15,6 +15,7 @@ class User(AbstractBaseUser):
         unique=True,
     )
     social_id = models.CharField(verbose_name=_("social id"), max_length=31)
+    is_deleted = models.BooleanField(verbose_name=_("is deleted"), default=False)
     is_admin = models.BooleanField(verbose_name=_("admin status"), default=False)
     is_superuser = models.BooleanField(
         verbose_name=_("superuser status"), default=False

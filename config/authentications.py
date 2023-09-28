@@ -17,7 +17,7 @@ class JsonWebTokenAuthentication(BaseAuthentication):
 
         user_id = payload.get("user_id", None)
         try:
-            user = User.objects.get(id=user_id)
+            user = User.objects.get(id=user_id, is_deleted=False)
             return user, None
         except User.DoesNotExist:
             raise AuthenticationFailed(message)
