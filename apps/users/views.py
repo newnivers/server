@@ -1,13 +1,19 @@
-from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import mixins, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.viewsets import GenericViewSet
 
+from apps.core.swaggers import auth_parameter
+from apps.core.views import BaseViewSet
 from apps.users.jwt import generate_access_jwt
 from apps.users.models import User
 from apps.users.serializers import UserSerializer
+from apps.users.swaggers import (
+    check_nickname_request_query,
+    check_nickname_responses,
+    naver_request_body,
+    naver_responses,
+)
 from apps.users.utils import (
     check_duplicate_nickname,
     get_naver_access_token,
@@ -19,37 +25,25 @@ class UserViewSet(
     mixins.RetrieveModelMixin,
     mixins.DestroyModelMixin,
     mixins.UpdateModelMixin,
-    GenericViewSet,
+    BaseViewSet,
 ):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
     @swagger_auto_schema(
         operation_summary="My page 조회 API",
-        manual_parameters=[
-            openapi.Parameter(
-                "Authorization",
-                openapi.IN_HEADER,
-                description="accesstoken은 필수입니다.",
-                type=openapi.TYPE_STRING,
-                required=True,
-            )
-        ],
+        manual_parameters=[auth_parameter],
     )
     def retrieve(self, request, *args, **kwargs):
-        return super().retrieve(request, *args, **kwargs)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return self.get_response(
+            "유저 정보 조회에 성공했습니다.", serializer.data, status.HTTP_200_OK
+        )
 
     @swagger_auto_schema(
         operation_summary="User 수정 API",
-        manual_parameters=[
-            openapi.Parameter(
-                "Authorization",
-                openapi.IN_HEADER,
-                description="accesstoken은 필수입니다.",
-                type=openapi.TYPE_STRING,
-                required=True,
-            )
-        ],
+        manual_parameters=[auth_parameter],
     )
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop("partial", False)
@@ -58,24 +52,13 @@ class UserViewSet(
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
 
-        if getattr(instance, "_prefetched_objects_cache", None):
-            # If 'prefetch_related' has been applied to a queryset, we need to
-            # forcibly invalidate the prefetch cache on the instance.
-            instance._prefetched_objects_cache = {}
-
-        return Response(serializer.data)
+        return self.get_response(
+            "유저 정보 수정에 성공하였습니다.", serializer.data, status.HTTP_200_OK
+        )
 
     @swagger_auto_schema(
         operation_summary="계정 삭제 API",
-        manual_parameters=[
-            openapi.Parameter(
-                "Authorization",
-                openapi.IN_HEADER,
-                description="accesstoken은 필수입니다.",
-                type=openapi.TYPE_STRING,
-                required=True,
-            )
-        ],
+        manual_parameters=[auth_parameter],
     )
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -88,33 +71,8 @@ class UserViewSet(
 
     @swagger_auto_schema(
         operation_summary="네이버 로그인 API",
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                "code": openapi.Schema(type=openapi.TYPE_STRING),
-                "state": openapi.Schema(type=openapi.TYPE_STRING),
-            },
-            required=["code", "state"],
-        ),
-        responses={
-            200: openapi.Schema(
-                type=openapi.TYPE_OBJECT,
-                properties={
-                    "token": openapi.Schema(type=openapi.TYPE_STRING),
-                    "user_id": openapi.Schema(type=openapi.TYPE_INTEGER),
-                    "nickname": openapi.Schema(type=openapi.TYPE_STRING),
-                },
-            ),
-            201: openapi.Schema(
-                type=openapi.TYPE_OBJECT,
-                properties={
-                    "token": openapi.Schema(type=openapi.TYPE_STRING),
-                    "user_id": openapi.Schema(type=openapi.TYPE_INTEGER),
-                    "nickname": openapi.Schema(type=openapi.TYPE_STRING),
-                },
-            ),
-            400: "invalid_value",
-        },
+        request_body=naver_request_body,
+        responses=naver_responses,
     )
     @action(methods=["POST"], detail=False, url_path="auth/naver")
     def naver(self, request):
@@ -124,26 +82,24 @@ class UserViewSet(
         state = data.get("state", None)
 
         if not (code or state):
-            return Response(
-                {"message": "missing_value"}, status=status.HTTP_400_BAD_REQUEST
+            return self.get_response(
+                "code와 state값은 필수입니다.", {}, status.HTTP_400_BAD_REQUEST
             )
 
         naver_access_token = get_naver_access_token(code, state)
 
         if not naver_access_token:
-            return Response(
-                {"message": "invalid_value"}, status=status.HTTP_400_BAD_REQUEST
-            )
+            return self.get_response("유효한 code가 아닙니다.", {}, status.HTTP_400_BAD_REQUEST)
 
         naver_user_info = get_naver_user_info(naver_access_token)
         if not naver_user_info:
-            return Response(
-                {"message": "invalid_value"}, status=status.HTTP_400_BAD_REQUEST
+            return self.get_response(
+                "네이버 유저정보를 가져오는데 실패했습니다.", {}, status.HTTP_400_BAD_REQUEST
             )
 
         try:
             user = User.objects.get(social_id=naver_user_info["id"])
-            _message = "login_success"
+            _message = "로그인에 성공했습니다."
             _status = status.HTTP_200_OK
 
         except User.DoesNotExist:
@@ -151,62 +107,30 @@ class UserViewSet(
                 nickname=naver_user_info["nickname"],
                 social_id=naver_user_info["id"],
             )
-            _message = "register_success"
+            _message = "회원가입에 성공하였습니다."
             _status = status.HTTP_201_CREATED
-
-        return Response(
+        return self.get_response(
+            _message,
             {
-                "message": _message,
-                "results": {
-                    "token": generate_access_jwt(user.id),
-                    "user_id": user.id,
-                    "nickname": user.nickname,
-                },
+                "token": generate_access_jwt(user.id),
+                "user_id": user.id,
+                "nickname": user.nickname,
             },
-            status=_status,
+            _status,
         )
 
     @swagger_auto_schema(
         operation_summary="nickname 중복체크 API",
-        manual_parameters=[
-            openapi.Parameter(
-                "nickname",
-                openapi.IN_QUERY,
-                description="accesstoken은 필수입니다.",
-                type=openapi.TYPE_STRING,
-                required=True,
-            )
-        ],
-        responses={
-            200: openapi.Schema(
-                type=openapi.TYPE_OBJECT,
-                properties={
-                    "is_duplicated": openapi.Schema(type=openapi.TYPE_BOOLEAN),
-                },
-            ),
-            409: openapi.Schema(
-                type=openapi.TYPE_OBJECT,
-                properties={
-                    "is_duplicated": openapi.Schema(type=openapi.TYPE_BOOLEAN),
-                },
-            ),
-        },
+        manual_parameters=[check_nickname_request_query],
+        responses=check_nickname_responses,
     )
     @action(methods=["GET"], detail=False, url_path="check-nickname")
     def check_nickname(self, request):
         nickname = request.query_params.get("nickname", None)
         if nickname and not check_duplicate_nickname(nickname):
-            return Response(
-                {
-                    "message": "사용가능한 닉네임 입니다.",
-                    "results": {"is_duplicated": True},
-                },
-                status=status.HTTP_200_OK,
+            return self.get_response(
+                "사용 가능한 닉네임 입니다.", {"is_duplicated": True}, status.HTTP_200_OK
             )
-        return Response(
-            {
-                "message": "사용불가능한 닉네임 입니다.",
-                "results": {"is_duplicated": False},
-            },
-            status=status.HTTP_409_CONFLICT,
+        return self.get_response(
+            "사용 불가능한 닉네임 입니다.", {"is_duplicated": False}, status.HTTP_409_CONFLICT
         )
