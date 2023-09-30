@@ -37,6 +37,7 @@ DJANGO_APPS = [
 
 PROJECT_APPS = [
     "apps.users",
+    "apps.arts",
 ]
 
 THIRD_PARTY_APPS = [
