@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 
 from django.http import JsonResponse
@@ -7,6 +8,8 @@ from rest_framework.exceptions import PermissionDenied
 
 from apps.users.jwt import check_jwt_expired_date, decode_jwt
 from apps.users.models import User
+
+logger = logging.getLogger(__name__)
 
 
 class JsonWebTokenMiddleWare(object):
@@ -22,6 +25,7 @@ class JsonWebTokenMiddleWare(object):
                 and "swagger" not in request.path
             ):
                 access_token = request.headers.get("Authorization", None)
+                logger.info(access_token)
                 if not access_token:
                     raise PermissionDenied()
 
