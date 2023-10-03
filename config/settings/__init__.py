@@ -37,12 +37,12 @@ DJANGO_APPS = [
 
 PROJECT_APPS = [
     "apps.users",
-    "apps.arts",
 ]
 
 THIRD_PARTY_APPS = [
     "rest_framework",
     "drf_yasg",
+    "djmoney",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + PROJECT_APPS + THIRD_PARTY_APPS
@@ -156,3 +156,7 @@ REST_FRAMEWORK = {
 # NAVER
 NAVER_CLIENT_ID = env("NAVER_CLIENT_ID")
 NAVER_CLIENT_SECRET = env("NAVER_CLIENT_SECRET")
+
+
+# DJANGO-MONEY
+CURRENCIES = ("KRW",)
