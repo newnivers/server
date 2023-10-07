@@ -37,12 +37,14 @@ DJANGO_APPS = [
 
 PROJECT_APPS = [
     "apps.users",
+    "apps.arts",
 ]
 
 THIRD_PARTY_APPS = [
     "rest_framework",
     "drf_yasg",
     "djmoney",
+    "phonenumber_field",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + PROJECT_APPS + THIRD_PARTY_APPS
