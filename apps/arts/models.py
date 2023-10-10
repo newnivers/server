@@ -14,6 +14,13 @@ class Art(TimeStampModel):
         null=True,
         verbose_name=_("create by"),
     )
+    place = models.ForeignKey(
+        "places.Place",
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="arts",
+        verbose_name=_("place"),
+    )
     title = models.CharField(
         verbose_name=_("title"),
         max_length=31,
@@ -63,6 +70,16 @@ class Art(TimeStampModel):
     end_date = models.DateField(
         verbose_name=_("end date"),
     )
+    is_free = models.BooleanField(default=False)
+    limit_purchase_count = models.PositiveIntegerField()
+
+    class Meta:
+        verbose_name = _("art")
+        verbose_name_plural = _("arts")
+        ordering = ["-id"]
+
+    def __str__(self):
+        return self.title
 
 
 class ArtSchedule(models.Model):
@@ -72,3 +89,11 @@ class ArtSchedule(models.Model):
     end_time = models.TimeField(
         verbose_name=_("end time"),
     )
+
+    class Meta:
+        verbose_name = _("art schedule")
+        verbose_name_plural = _("art schedules")
+        ordering = ["-id"]
+
+    def __str__(self):
+        return f"{self.start_time - self.end_time}"
