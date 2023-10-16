@@ -25,8 +25,7 @@ class Art(TimeStampModel):
         verbose_name=_("title"),
         max_length=31,
     )
-    image = models.ImageField(
-        upload_to="arts",
+    image = models.URLField(
         verbose_name=_("image"),
     )
     genre = models.CharField(
@@ -83,6 +82,12 @@ class Art(TimeStampModel):
 
 
 class ArtSchedule(models.Model):
+    art = models.ForeignKey(
+        "arts.Art",
+        on_delete=models.CASCADE,
+        related_name="art_schedules",
+        verbose_name=_("art schedule"),
+    )
     start_time = models.TimeField(
         verbose_name=_("start time"),
     )
@@ -97,3 +102,23 @@ class ArtSchedule(models.Model):
 
     def __str__(self):
         return f"{self.start_time - self.end_time}"
+
+
+class Ticket(models.Model):
+    art = models.ForeignKey(
+        "arts.Art",
+        on_delete=models.SET_NULL,
+        related_name="tickets",
+        null=True,
+        verbose_name=_("create by"),
+    )
+    date = models.DateField()
+    is_reserved = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = _("ticket mater data")
+        verbose_name_plural = _("ticket master data")
+        ordering = ["-id"]
+
+    def __str__(self):
+        return f"{self.column}{self.row}"
