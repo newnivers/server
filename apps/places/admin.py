@@ -1,3 +1,5 @@
 from django.contrib import admin
 
-# Register your models here.
+from apps.places.models import Place, Seat
+
+admin.site.register([Place, Seat])

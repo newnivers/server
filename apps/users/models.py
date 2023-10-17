@@ -14,7 +14,7 @@ class User(AbstractBaseUser):
         validators=[UnicodeUsernameValidator()],
         unique=True,
     )
-    social_id = models.CharField(verbose_name=_("social id"), max_length=31)
+    social_id = models.CharField(verbose_name=_("social id"), max_length=63)
     profile_image = models.URLField(
         verbose_name=_("profile image"), default="", blank=True
     )

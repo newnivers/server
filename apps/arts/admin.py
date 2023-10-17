@@ -1,3 +1,5 @@
 from django.contrib import admin
 
-# Register your models here.
+from apps.arts.models import Art, ArtSchedule, Ticket
+
+admin.site.register([Art, ArtSchedule, Ticket])
