@@ -1,16 +1,7 @@
 from rest_framework.serializers import ModelSerializer
 
 from apps.arts.models import Art
-from apps.places.models import Place
-
-
-class PlaceSerializer(ModelSerializer):
-    class Meta:
-        model = Place
-        fields = [
-            "id",
-            "name",
-        ]
+from apps.places.serializers import PlaceSerializer
 
 
 class ArtSerializer(ModelSerializer):
