@@ -11,6 +11,7 @@ from apps.users.serializers import UserSerializer
 from apps.users.swaggers import (
     check_nickname_request_query,
     check_nickname_responses,
+    dev_auth_request_body,
     naver_request_body,
     naver_responses,
 )
@@ -133,4 +134,45 @@ class UserViewSet(
             )
         return self.get_response(
             "사용 불가능한 닉네임 입니다.", {"is_duplicated": False}, status.HTTP_409_CONFLICT
+        )
+
+
+class DevAuthView(BaseViewSet):
+    @swagger_auto_schema(
+        operation_summary="개발용 토큰 발급 API",
+        operation_description="개발 환경에서만 유효한 api입니다. 운영환경에서는 활성화 되어있지 않습니다.",
+        request_body=dev_auth_request_body,
+        responses=naver_responses,
+    )
+    @action(methods=["POST"], detail=False, url_path="auth/dev")
+    def dev(self, request):
+        data = request.data.copy()
+
+        nickname = data.get("nickname", None)
+
+        if not nickname:
+            return self.get_response(
+                "nickname값은 필수입니다.", {}, status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            user = User.objects.get(nickname=nickname)
+            _message = "로그인에 성공했습니다."
+            _status = status.HTTP_200_OK
+
+        except User.DoesNotExist:
+            user = User.objects.create(
+                nickname=nickname,
+                social_id=nickname,
+            )
+            _message = "회원가입에 성공하였습니다."
+            _status = status.HTTP_201_CREATED
+        return self.get_response(
+            _message,
+            {
+                "token": generate_access_jwt(user.id),
+                "user_id": user.id,
+                "nickname": user.nickname,
+            },
+            _status,
         )

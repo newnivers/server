@@ -51,3 +51,13 @@ check_nickname_responses = {
         },
     ),
 }
+
+dev_auth_request_body = openapi.Schema(
+    type=openapi.TYPE_OBJECT,
+    properties={
+        "nickname": openapi.Schema(type=openapi.TYPE_STRING),
+    },
+    required=[
+        "nickname",
+    ],
+)
