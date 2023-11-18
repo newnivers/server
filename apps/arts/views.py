@@ -1,8 +1,11 @@
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import mixins, status
+from rest_framework.decorators import action
 
+from apps.arts import CategoryChoices
 from apps.arts.models import Art
 from apps.arts.serializers import ArtSerializer
+from apps.arts.swaggers import categories_responses
 from apps.core.swaggers import auth_parameter
 from apps.core.views import BaseViewSet
 
@@ -71,3 +74,16 @@ class ArtViewSet(
             # forcibly invalidate the prefetch cache on the instance.
             instance._prefetched_objects_cache = {}
         return self.get_response("작품 수정에 성공했습니다.", serializer.data, status.HTTP_200_OK)
+
+    @swagger_auto_schema(
+        operation_summary="작품 카테고리 리스트 조회 API",
+        manual_parameters=[auth_parameter],
+        responses=categories_responses,
+    )
+    @action(methods=["GET"], detail=False)
+    def categories(self, request):
+        return self.get_response(
+            "작품 카테고리 리스트 조회에 성공했습니다.",
+            {"categories": CategoryChoices.values},
+            status.HTTP_200_OK,
+        )

@@ -1,8 +1,9 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from djmoney.models.fields import MoneyField
 from phonenumber_field.modelfields import PhoneNumberField
 
-from apps.arts import CategoryChoices, GenreChoices, StatusChoices
+from apps.arts import CategoryChoices, StatusChoices
 from apps.core.models import TimeStampModel
 
 
@@ -21,22 +22,11 @@ class Art(TimeStampModel):
         related_name="arts",
         verbose_name=_("place"),
     )
-    title = models.CharField(
-        verbose_name=_("title"),
-        max_length=31,
-    )
-    image = models.URLField(
-        verbose_name=_("image"),
-    )
-    genre = models.CharField(
-        max_length=7,
-        choices=GenreChoices.choices,
-        verbose_name=_("genre"),
-    )
+    title = models.CharField(max_length=31, verbose_name=_("title"))
+    image = models.URLField(verbose_name=_("image"))
+    genre = models.CharField(max_length=15, verbose_name=_("genre"))
     category = models.CharField(
-        max_length=7,
-        choices=CategoryChoices.choices,
-        verbose_name=_("category"),
+        max_length=15, choices=CategoryChoices.choices, verbose_name=_("category")
     )
     status = models.CharField(
         max_length=15,
@@ -45,32 +35,28 @@ class Art(TimeStampModel):
         verbose_name=_("status"),
     )
     running_time = models.PositiveIntegerField(
-        default=0,
-        verbose_name=_("running time"),
+        default=0, verbose_name=_("running time")
     )
-    age_limit = models.PositiveIntegerField(
-        default=0,
-        verbose_name=_("age limit"),
-    )
+    age_limit = models.PositiveIntegerField(default=0, verbose_name=_("age limit"))
     inter_mission = models.PositiveIntegerField(
-        default=0,
-        verbose_name=_("inter mission"),
+        default=0, verbose_name=_("inter mission")
     )
-    description = models.TextField(
-        verbose_name=_("description"),
-    )
-    caution_description = models.TextField(
-        verbose_name=_("caution description"),
-    )
+    description = models.TextField(verbose_name=_("description"))
+    caution_description = models.TextField(verbose_name=_("caution description"))
     cs_phone_number = PhoneNumberField()
-    start_date = models.DateField(
-        verbose_name=_("start date"),
-    )
-    end_date = models.DateField(
-        verbose_name=_("end date"),
-    )
+
+    reserved_seat = models.BooleanField(default=False)
     is_free = models.BooleanField(default=False)
-    limit_purchase_count = models.PositiveIntegerField()
+    purchase_limit_count = models.PositiveIntegerField(
+        default=1,
+        verbose_name=_("limit purchase count"),
+    )
+    price = MoneyField(
+        max_digits=15,
+        decimal_places=2,
+        default_currency="KRW",
+        verbose_name=_("price"),
+    )
 
     class Meta:
         verbose_name = _("art")
@@ -80,6 +66,14 @@ class Art(TimeStampModel):
     def __str__(self):
         return self.title
 
+    @property
+    def start_date(self):
+        return min(self.art_schedules.values("start_at"))
+
+    @property
+    def end_date(self):
+        return min(self.art_schedules.values("end_at"))
+
 
 class ArtSchedule(models.Model):
     art = models.ForeignKey(
@@ -88,12 +82,9 @@ class ArtSchedule(models.Model):
         related_name="art_schedules",
         verbose_name=_("art schedule"),
     )
-    start_time = models.TimeField(
-        verbose_name=_("start time"),
-    )
-    end_time = models.TimeField(
-        verbose_name=_("end time"),
-    )
+    start_at = models.DateTimeField(verbose_name=_("start at"))
+    end_at = models.DateTimeField(verbose_name=_("end at"))
+    seat_count = models.PositiveIntegerField(verbose_name=_("seat count"))
 
     class Meta:
         verbose_name = _("art schedule")
@@ -101,23 +92,28 @@ class ArtSchedule(models.Model):
         ordering = ["-id"]
 
     def __str__(self):
-        return f"{self.start_time - self.end_time}"
+        return f"{self.start_time} - {self.end_time}"
 
 
 class Ticket(models.Model):
-    art = models.ForeignKey(
-        "arts.Art",
+    art_schedule = models.ForeignKey(
+        "arts.ArtSchedule",
         on_delete=models.SET_NULL,
         related_name="tickets",
         null=True,
         verbose_name=_("create by"),
     )
-    date = models.DateField()
-    is_reserved = models.BooleanField(default=False)
+    seat = models.ForeignKey(
+        "places.Seat",
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="tickets",
+        verbose_name=_("seat"),
+    )
 
     class Meta:
-        verbose_name = _("ticket mater data")
-        verbose_name_plural = _("ticket master data")
+        verbose_name = _("ticket")
+        verbose_name_plural = _("tickets")
         ordering = ["-id"]
 
     def __str__(self):

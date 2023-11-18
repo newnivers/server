@@ -26,5 +26,5 @@ class ArtSerializer(ModelSerializer):
             "start_date",
             "end_date",
             "is_free",
-            "limit_purchase_count",
+            "purchase_limit_count",
         ]

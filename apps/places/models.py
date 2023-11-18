@@ -23,13 +23,6 @@ class Seat(models.Model):
         related_name="seats",
         verbose_name=_("place"),
     )
-    ticket = models.ForeignKey(
-        "arts.Ticket",
-        on_delete=models.SET_NULL,
-        null=True,
-        related_name="seats",
-        verbose_name=_("ticket"),
-    )
     column = models.CharField(max_length=3, verbose_name=_("column"))
     row = models.CharField(max_length=7, verbose_name=_("row"))
 
