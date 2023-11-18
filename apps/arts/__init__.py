@@ -8,6 +8,6 @@ class CategoryChoices(models.TextChoices):
 
 
 class StatusChoices(models.TextChoices):
-    PENDING = "PEND", _("검수중")
+    PENDING = "PENDING", _("검수중")
     REJECTED = "REJECTED", _("거부")
     APPROVED = "APPROVED", _("허용")

@@ -44,7 +44,6 @@ class Art(TimeStampModel):
     description = models.TextField(verbose_name=_("description"))
     caution_description = models.TextField(verbose_name=_("caution description"))
     cs_phone_number = PhoneNumberField()
-
     reserved_seat = models.BooleanField(default=False)
     is_free = models.BooleanField(default=False)
     purchase_limit_count = models.PositiveIntegerField(
@@ -68,18 +67,18 @@ class Art(TimeStampModel):
 
     @property
     def start_date(self):
-        return min(self.art_schedules.values("start_at"))
+        return min(self.schedules.values_list("start_at", flat=True))
 
     @property
     def end_date(self):
-        return min(self.art_schedules.values("end_at"))
+        return max(self.schedules.values_list("end_at", flat=True))
 
 
 class ArtSchedule(models.Model):
     art = models.ForeignKey(
         "arts.Art",
         on_delete=models.CASCADE,
-        related_name="art_schedules",
+        related_name="schedules",
         verbose_name=_("art schedule"),
     )
     start_at = models.DateTimeField(verbose_name=_("start at"))
@@ -91,8 +90,19 @@ class ArtSchedule(models.Model):
         verbose_name_plural = _("art schedules")
         ordering = ["-id"]
 
+        constraints = [
+            models.UniqueConstraint(
+                fields=["art", "start_at"],
+                name="unique schedule start at",
+            ),
+            models.UniqueConstraint(
+                fields=["art", "end_at"],
+                name="unique schedule end at",
+            ),
+        ]
+
     def __str__(self):
-        return f"{self.start_time} - {self.end_time}"
+        return f"{self.start_at} - {self.end_at}"
 
 
 class Ticket(models.Model):
