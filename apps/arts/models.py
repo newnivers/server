@@ -54,6 +54,8 @@ class Art(TimeStampModel):
         default_currency="KRW",
         verbose_name=_("price"),
     )
+    ticket_open_at = models.DateTimeField()
+    ticket_close_at = models.DateTimeField()
 
     class Meta:
         verbose_name = _("art")

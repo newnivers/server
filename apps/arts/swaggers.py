@@ -55,6 +55,12 @@ art_request_body = openapi.Schema(
             items=art_schedule_schema,
             minItems=1,
         ),
+        "ticket_open_at": openapi.Schema(
+            type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME
+        ),
+        "ticket_close_at": openapi.Schema(
+            type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME
+        ),
     },
     required=[
         "place",
@@ -68,6 +74,8 @@ art_request_body = openapi.Schema(
         "cs_phone_number",
         "price",
         "schedules",
+        "ticket_open_at",
+        "ticket_close_at",
     ],
 )
 
@@ -113,6 +121,12 @@ art_response_schema = openapi.Schema(
         "isFree": openapi.Schema(type=openapi.TYPE_BOOLEAN),
         "purchaseLimitCount": openapi.Schema(type=openapi.TYPE_INTEGER),
         "price": openapi.Schema(type=openapi.TYPE_STRING),
+        "ticket_open_at": openapi.Schema(
+            type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME
+        ),
+        "ticket_close_at": openapi.Schema(
+            type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME
+        ),
         "schedules": openapi.Schema(
             type=openapi.TYPE_ARRAY,
             items=art_schedule_response_schema,

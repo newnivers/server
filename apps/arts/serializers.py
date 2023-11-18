@@ -22,7 +22,7 @@ class ArtScheduleSerializer(ModelSerializer):
 
         if start_at and end_at and start_at > end_at:
             raise serializers.ValidationError(
-                {"start_at": "start_at은 end_at보다 더 클 수 없습니다."}
+                {"start_at": "start_at은 end_at보다 클 수 없습니다."}
             )
 
         return super().validate(data)
@@ -55,11 +55,20 @@ class ArtSerializer(ModelSerializer):
             "purchase_limit_count",
             "price",
             "schedules",
+            "ticket_open_at",
+            "ticket_close_at",
         ]
 
     def validate(self, data):
         is_free = data.get("is_free", None)
         price = data.get("price", None)
+        ticket_open_at = data.get("ticket_open_at", None)
+        ticket_close_at = data.get("ticket_close_at", None)
+
+        if ticket_open_at and ticket_close_at and ticket_open_at > ticket_close_at:
+            raise serializers.ValidationError(
+                {"ticket_open_at": "ticket_open_at은 ticket_close_at보다 클 수 없습니다."}
+            )
 
         if is_free and price > 0:
             raise serializers.ValidationError(
