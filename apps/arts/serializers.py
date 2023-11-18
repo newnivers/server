@@ -70,15 +70,32 @@ class ArtSerializer(ModelSerializer):
 
     @atomic
     def create(self, validated_data):
-        schedules_data = validated_data.get("schedules", [])
-        if schedules_data:
-            schedules_data = validated_data.pop("schedules", [])
+        schedules_data = validated_data.pop("schedules", [])
+        validated_data["user"] = self.context.get("request").user
         art_instance = super().create(validated_data)
         art_schedules = [
             ArtSchedule(art=art_instance, **schedule_data)
             for schedule_data in schedules_data
         ]
         try:
+            ArtSchedule.objects.bulk_create(art_schedules)
+        except IntegrityError:
+            raise serializers.ValidationError(
+                {"schedules": "중복된 start_at 또는 end_at 값은 입력할 수 없습니다."},
+            )
+        return art_instance
+
+    @atomic
+    def update(self, instance, validated_data):
+        schedules_data = validated_data.pop("schedules", [])
+        validated_data["user"] = self.context.get("request").user
+        art_instance = super().update(instance, validated_data)
+        art_schedules = [
+            ArtSchedule(art=art_instance, **schedule_data)
+            for schedule_data in schedules_data
+        ]
+        try:
+            art_instance.schedules.all().delete()
             ArtSchedule.objects.bulk_create(art_schedules)
         except IntegrityError:
             raise serializers.ValidationError(
