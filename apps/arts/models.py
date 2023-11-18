@@ -34,9 +34,7 @@ class Art(TimeStampModel):
         default=StatusChoices.PENDING,
         verbose_name=_("status"),
     )
-    running_time = models.PositiveIntegerField(
-        default=0, verbose_name=_("running time")
-    )
+    running_time = models.PositiveIntegerField(verbose_name=_("running time"))
     age_limit = models.PositiveIntegerField(default=0, verbose_name=_("age limit"))
     inter_mission = models.PositiveIntegerField(
         default=0, verbose_name=_("inter mission")

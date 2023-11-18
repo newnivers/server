@@ -5,7 +5,11 @@ from rest_framework.decorators import action
 from apps.arts import CategoryChoices
 from apps.arts.models import Art
 from apps.arts.serializers import ArtSerializer
-from apps.arts.swaggers import categories_responses
+from apps.arts.swaggers import (
+    art_request_body,
+    art_response_schema,
+    categories_responses,
+)
 from apps.core.swaggers import auth_parameter
 from apps.core.views import BaseViewSet
 
@@ -51,16 +55,22 @@ class ArtViewSet(
     @swagger_auto_schema(
         operation_summary="작품 생성 API",
         manual_parameters=[auth_parameter],
+        request_body=art_request_body,
+        responses={201: art_response_schema},
     )
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
-        return self.get_response("작품 생성에 성공했습니다.", serializer.data, status.HTTP_200_OK)
+        return self.get_response(
+            "작품 생성에 성공했습니다.", serializer.data, status.HTTP_201_CREATED
+        )
 
     @swagger_auto_schema(
         operation_summary="작품 수정 API",
         manual_parameters=[auth_parameter],
+        request_body=art_request_body,
+        responses={200: art_response_schema},
     )
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop("partial", False)
