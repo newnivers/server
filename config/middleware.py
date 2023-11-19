@@ -28,7 +28,6 @@ class JsonWebTokenMiddleWare(object):
                 and "redoc" not in request.path
             ):
                 access_token = request.headers.get("Authorization", None)
-                logger.info(access_token)
                 if not access_token:
                     raise PermissionDenied()
 
@@ -55,11 +54,13 @@ class JsonWebTokenMiddleWare(object):
             return response
 
         except (PermissionDenied, User.DoesNotExist):
+            logger.error(access_token)
             return JsonResponse(
                 {"error": "Authorization Error"}, status=status.HTTP_401_UNAUTHORIZED
             )
 
         except ExpiredSignatureError:
+            logger.error(access_token)
             return JsonResponse(
                 {"error": "Expired token. Please log in again."},
                 status=status.HTTP_403_FORBIDDEN,
