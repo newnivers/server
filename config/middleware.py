@@ -25,6 +25,7 @@ class JsonWebTokenMiddleWare(object):
                 and request.path != "/api/users/test"
                 and "admin" not in request.path
                 and "swagger" not in request.path
+                and "redoc" not in request.path
             ):
                 access_token = request.headers.get("Authorization", None)
                 logger.info(access_token)
