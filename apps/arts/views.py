@@ -1,8 +1,9 @@
+from django.db.models import Q
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import mixins, status
 from rest_framework.decorators import action
 
-from apps.arts import CategoryChoices
+from apps.arts import CategoryChoices, StatusChoices
 from apps.arts.models import Art
 from apps.arts.serializers import ArtSerializer
 from apps.arts.swaggers import (
@@ -10,7 +11,7 @@ from apps.arts.swaggers import (
     art_response_schema,
     categories_responses,
 )
-from apps.core.swaggers import auth_parameter
+from apps.core.swaggers import auth_parameter, end_date_parameter, start_date_parameter
 from apps.core.views import BaseViewSet
 
 
@@ -21,12 +22,31 @@ class ArtViewSet(
     mixins.CreateModelMixin,
     BaseViewSet,
 ):
-    queryset = Art.objects.all()
     serializer_class = ArtSerializer
+
+    def get_queryset(self):
+        q = Q()
+
+        if self.action == "list":
+            start_date = self.request.query_params.get("start_date", None)
+            end_date = self.request.query_params.get("end_date", None)
+
+            if start_date:
+                q &= Q(created_at__gte=start_date)
+            if end_date:
+                q &= Q(created_at__lte=end_date)
+
+        q &= Q(status=StatusChoices.APPROVED)
+
+        return Art.objects.filter(q)
 
     @swagger_auto_schema(
         operation_summary="작품 리스트 조회 API",
-        manual_parameters=[auth_parameter],
+        manual_parameters=[
+            auth_parameter,
+            start_date_parameter,
+            end_date_parameter,
+        ],
     )
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())

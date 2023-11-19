@@ -57,6 +57,8 @@ class ArtSerializer(ModelSerializer):
             "schedules",
             "ticket_open_at",
             "ticket_close_at",
+            "created_at",
+            "updated_at",
         ]
 
     def validate(self, data):
