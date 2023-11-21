@@ -1,6 +1,6 @@
 from drf_yasg import openapi
 
-from apps.arts import StatusChoices
+from apps.arts import CategoryChoices, StatusChoices
 
 categories_responses = {
     200: openapi.Schema(
@@ -37,9 +37,13 @@ art_request_body = openapi.Schema(
         "image": openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_URI),
         "genre": openapi.Schema(type=openapi.TYPE_STRING),
         "status": openapi.Schema(
-            type=openapi.TYPE_STRING, default=StatusChoices.PENDING
+            type=openapi.TYPE_STRING,
+            enum=StatusChoices.values,
+            default=StatusChoices.PENDING,
         ),
-        "category": openapi.Schema(type=openapi.TYPE_STRING),
+        "category": openapi.Schema(
+            type=openapi.TYPE_STRING, enum=CategoryChoices.values
+        ),
         "running_time": openapi.Schema(type=openapi.TYPE_INTEGER),
         "age_limit": openapi.Schema(type=openapi.TYPE_INTEGER, default=0),
         "inter_mission": openapi.Schema(type=openapi.TYPE_INTEGER, default=0),
@@ -103,8 +107,10 @@ art_response_schema = openapi.Schema(
         "title": openapi.Schema(type=openapi.TYPE_STRING),
         "image": openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_URI),
         "genre": openapi.Schema(type=openapi.TYPE_STRING),
-        "category": openapi.Schema(type=openapi.TYPE_STRING),
-        "status": openapi.Schema(type=openapi.TYPE_STRING),
+        "category": openapi.Schema(
+            type=openapi.TYPE_STRING, enum=CategoryChoices.values
+        ),
+        "status": openapi.Schema(type=openapi.TYPE_STRING, enum=StatusChoices.values),
         "runningTime": openapi.Schema(type=openapi.TYPE_INTEGER),
         "ageLimit": openapi.Schema(type=openapi.TYPE_INTEGER),
         "interMission": openapi.Schema(type=openapi.TYPE_INTEGER),
