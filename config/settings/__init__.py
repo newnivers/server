@@ -163,3 +163,14 @@ NAVER_CLIENT_SECRET = env("NAVER_CLIENT_SECRET")
 
 # DJANGO-MONEY
 CURRENCIES = ("KRW",)
+
+# CACHES
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": env("CACHE_URL"),
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        },
+    }
+}
