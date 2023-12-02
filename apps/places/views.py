@@ -22,9 +22,7 @@ class PlaceViewSet(
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
-        return self.get_response(
-            "장소 상세 조회에 성공했습니다.", serializer.data, status.HTTP_200_OK
-        )
+        return self.get_response("장소 상세 조회에 성공했습니다.", serializer.data, status.HTTP_200_OK)
 
     @swagger_auto_schema(
         operation_summary="장소 리스트 조회 API",
@@ -39,6 +37,4 @@ class PlaceViewSet(
             return self.get_paginated_response(serializer.data)
 
         serializer = self.get_serializer(queryset, many=True)
-        return self.get_response(
-            "장소 리스트 조회에 성공했습니다.", serializer.data, status.HTTP_200_OK
-        )
+        return self.get_response("장소 리스트 조회에 성공했습니다.", serializer.data, status.HTTP_200_OK)

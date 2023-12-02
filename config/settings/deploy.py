@@ -58,12 +58,7 @@ LOGGING = {
     "disable_existing_loggers": False,
     "root": {"level": "DEBUG", "handlers": ["file"]},
     "formatters": {
-        "verbose": {
-            "format": (
-                "%(asctime)s %(levelname)s %(name)s %(message)s"
-                " [PID:%(process)d:%(threadName)s]"
-            )
-        },
+        "verbose": {"format": ("%(asctime)s %(levelname)s %(name)s %(message)s" " [PID:%(process)d:%(threadName)s]")},
         "simple": {"format": "%(levelname)s %(message)s"},
     },
     "filters": {"require_debug_false": {"()": "django.utils.log.RequireDebugFalse"}},

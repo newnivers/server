@@ -57,9 +57,7 @@ class ArtViewSet(
             return self.get_paginated_response(serializer.data)
 
         serializer = self.get_serializer(queryset, many=True)
-        return self.get_response(
-            "작품 리스트 조회에 성공했습니다.", serializer.data, status.HTTP_200_OK
-        )
+        return self.get_response("작품 리스트 조회에 성공했습니다.", serializer.data, status.HTTP_200_OK)
 
     @swagger_auto_schema(
         operation_summary="작품 상세 조회 API",
@@ -68,9 +66,7 @@ class ArtViewSet(
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
-        return self.get_response(
-            "작품 상세 정보 조회에 성공했습니다.", serializer.data, status.HTTP_200_OK
-        )
+        return self.get_response("작품 상세 정보 조회에 성공했습니다.", serializer.data, status.HTTP_200_OK)
 
     @swagger_auto_schema(
         operation_summary="작품 생성 API",
@@ -82,9 +78,7 @@ class ArtViewSet(
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
-        return self.get_response(
-            "작품 생성에 성공했습니다.", serializer.data, status.HTTP_201_CREATED
-        )
+        return self.get_response("작품 생성에 성공했습니다.", serializer.data, status.HTTP_201_CREATED)
 
     @swagger_auto_schema(
         operation_summary="작품 수정 API",

@@ -38,9 +38,7 @@ class UserViewSet(
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
-        return self.get_response(
-            "유저 정보 조회에 성공했습니다.", serializer.data, status.HTTP_200_OK
-        )
+        return self.get_response("유저 정보 조회에 성공했습니다.", serializer.data, status.HTTP_200_OK)
 
     @swagger_auto_schema(
         operation_summary="User 수정 API",
@@ -53,9 +51,7 @@ class UserViewSet(
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
 
-        return self.get_response(
-            "유저 정보 수정에 성공하였습니다.", serializer.data, status.HTTP_200_OK
-        )
+        return self.get_response("유저 정보 수정에 성공하였습니다.", serializer.data, status.HTTP_200_OK)
 
     @swagger_auto_schema(
         operation_summary="계정 삭제 API",
@@ -83,9 +79,7 @@ class UserViewSet(
         state = data.get("state", None)
 
         if not (code or state):
-            return self.get_response(
-                "code와 state값은 필수입니다.", {}, status.HTTP_400_BAD_REQUEST
-            )
+            return self.get_response("code와 state값은 필수입니다.", {}, status.HTTP_400_BAD_REQUEST)
 
         naver_access_token = get_naver_access_token(code, state)
 
@@ -94,9 +88,7 @@ class UserViewSet(
 
         naver_user_info = get_naver_user_info(naver_access_token)
         if not naver_user_info:
-            return self.get_response(
-                "네이버 유저정보를 가져오는데 실패했습니다.", {}, status.HTTP_400_BAD_REQUEST
-            )
+            return self.get_response("네이버 유저정보를 가져오는데 실패했습니다.", {}, status.HTTP_400_BAD_REQUEST)
 
         try:
             user = User.objects.get(social_id=naver_user_info["id"])
@@ -129,12 +121,8 @@ class UserViewSet(
     def check_nickname(self, request):
         nickname = request.query_params.get("nickname", None)
         if nickname and not check_duplicate_nickname(nickname):
-            return self.get_response(
-                "사용 가능한 닉네임 입니다.", {"is_duplicated": True}, status.HTTP_200_OK
-            )
-        return self.get_response(
-            "사용 불가능한 닉네임 입니다.", {"is_duplicated": False}, status.HTTP_409_CONFLICT
-        )
+            return self.get_response("사용 가능한 닉네임 입니다.", {"is_duplicated": True}, status.HTTP_200_OK)
+        return self.get_response("사용 불가능한 닉네임 입니다.", {"is_duplicated": False}, status.HTTP_409_CONFLICT)
 
 
 class DevAuthView(BaseViewSet):
@@ -151,9 +139,7 @@ class DevAuthView(BaseViewSet):
         nickname = data.get("nickname", None)
 
         if not nickname:
-            return self.get_response(
-                "nickname값은 필수입니다.", {}, status.HTTP_400_BAD_REQUEST
-            )
+            return self.get_response("nickname값은 필수입니다.", {}, status.HTTP_400_BAD_REQUEST)
 
         try:
             user = User.objects.get(nickname=nickname)
