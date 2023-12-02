@@ -21,9 +21,7 @@ class ArtScheduleSerializer(ModelSerializer):
         end_at = data.get("end_at")
 
         if start_at and end_at and start_at > end_at:
-            raise serializers.ValidationError(
-                {"start_at": "start_at은 end_at보다 클 수 없습니다."}
-            )
+            raise serializers.ValidationError({"start_at": "start_at은 end_at보다 클 수 없습니다."})
 
         return super().validate(data)
 
@@ -68,14 +66,10 @@ class ArtSerializer(ModelSerializer):
         ticket_close_at = data.get("ticket_close_at", None)
 
         if ticket_open_at and ticket_close_at and ticket_open_at > ticket_close_at:
-            raise serializers.ValidationError(
-                {"ticket_open_at": "ticket_open_at은 ticket_close_at보다 클 수 없습니다."}
-            )
+            raise serializers.ValidationError({"ticket_open_at": "ticket_open_at은 ticket_close_at보다 클 수 없습니다."})
 
         if is_free and price > 0:
-            raise serializers.ValidationError(
-                {"is_free": "is_free가 true일때 price는 0이여야만 합니다."}
-            )
+            raise serializers.ValidationError({"is_free": "is_free가 true일때 price는 0이여야만 합니다."})
 
         return super().validate(data)
 
@@ -84,10 +78,7 @@ class ArtSerializer(ModelSerializer):
         schedules_data = validated_data.pop("schedules", [])
         validated_data["user"] = self.context.get("request").user
         art_instance = super().create(validated_data)
-        art_schedules = [
-            ArtSchedule(art=art_instance, **schedule_data)
-            for schedule_data in schedules_data
-        ]
+        art_schedules = [ArtSchedule(art=art_instance, **schedule_data) for schedule_data in schedules_data]
         try:
             ArtSchedule.objects.bulk_create(art_schedules)
         except IntegrityError:
@@ -101,10 +92,7 @@ class ArtSerializer(ModelSerializer):
         schedules_data = validated_data.pop("schedules", [])
         validated_data["user"] = self.context.get("request").user
         art_instance = super().update(instance, validated_data)
-        art_schedules = [
-            ArtSchedule(art=art_instance, **schedule_data)
-            for schedule_data in schedules_data
-        ]
+        art_schedules = [ArtSchedule(art=art_instance, **schedule_data) for schedule_data in schedules_data]
         try:
             art_instance.schedules.all().delete()
             ArtSchedule.objects.bulk_create(art_schedules)
@@ -119,7 +107,5 @@ class ArtSerializer(ModelSerializer):
         place = representation.get("place", None)
         if place:
             representation["place"] = instance.place.name
-        representation["schedules"] = ArtScheduleSerializer(
-            instance.schedules.all(), many=True
-        ).data
+        representation["schedules"] = ArtScheduleSerializer(instance.schedules.all(), many=True).data
         return representation
