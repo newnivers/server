@@ -3,10 +3,18 @@ from django.db.transaction import atomic
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 
-from apps.arts.models import Art, ArtSchedule
+from apps.arts.models import Art, ArtSchedule, Ticket
+
+
+class TicketSerializer(ModelSerializer):
+    class Meta:
+        model = Ticket
+        fields = ["id", "art_schedule", "seat", "qr_code"]
 
 
 class ArtScheduleSerializer(ModelSerializer):
+    tickets = TicketSerializer(many=True, read_only=True)
+
     class Meta:
         model = ArtSchedule
         fields = [
@@ -14,6 +22,7 @@ class ArtScheduleSerializer(ModelSerializer):
             "start_at",
             "end_at",
             "seat_count",
+            "tickets",
         ]
 
     def validate(self, data):
@@ -80,7 +89,13 @@ class ArtSerializer(ModelSerializer):
         art_instance = super().create(validated_data)
         art_schedules = [ArtSchedule(art=art_instance, **schedule_data) for schedule_data in schedules_data]
         try:
-            ArtSchedule.objects.bulk_create(art_schedules)
+            art_schedules_data = ArtSchedule.objects.bulk_create(art_schedules)
+            tickets = [
+                Ticket(art_schedule=art_schedule, seat=seat, qr_code=None)
+                for art_schedule in art_schedules_data
+                for seat in art_instance.place.seats.all()
+            ]
+            Ticket.objects.bulk_create(tickets)
         except IntegrityError:
             raise serializers.ValidationError(
                 {"schedules": "중복된 start_at 또는 end_at 값은 입력할 수 없습니다."},
@@ -95,7 +110,13 @@ class ArtSerializer(ModelSerializer):
         art_schedules = [ArtSchedule(art=art_instance, **schedule_data) for schedule_data in schedules_data]
         try:
             art_instance.schedules.all().delete()
-            ArtSchedule.objects.bulk_create(art_schedules)
+            art_schedules_data = ArtSchedule.objects.bulk_create(art_schedules)
+            tickets = [
+                Ticket(art_schedule=art_schedule, seat=seat, qr_code=None)
+                for art_schedule in art_schedules_data
+                for seat in art_instance.place.seats.all()
+            ]
+            Ticket.objects.bulk_create(tickets)
         except IntegrityError:
             raise serializers.ValidationError(
                 {"schedules": "중복된 start_at 또는 end_at 값은 입력할 수 없습니다."},

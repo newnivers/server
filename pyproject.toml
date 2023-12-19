@@ -34,6 +34,7 @@ django-storages = "^1.14.1"
 django-phonenumber-field = {extras = ["phonenumberslite"], version = "^7.2.0"}
 pillow = "^10.0.1"
 django-redis = "^5.4.0"
+qrcode = "^7.4.2"
 
 
 [build-system]

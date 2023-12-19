@@ -1,11 +1,15 @@
+from io import BytesIO
+
+import qrcode
+from django.core.files import File
 from django.db.models import Q
-from drf_yasg.utils import swagger_auto_schema
-from rest_framework import mixins, status
+from drf_yasg.utils import no_body, swagger_auto_schema
+from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 
 from apps.arts import CategoryChoices, StatusChoices
-from apps.arts.models import Art
-from apps.arts.serializers import ArtSerializer
+from apps.arts.models import Art, Ticket
+from apps.arts.serializers import ArtSerializer, TicketSerializer
 from apps.arts.swaggers import (
     art_request_body,
     art_response_schema,
@@ -107,5 +111,54 @@ class ArtViewSet(
         return self.get_response(
             "작품 카테고리 리스트 조회에 성공했습니다.",
             {"categories": CategoryChoices.values},
+            status.HTTP_200_OK,
+        )
+
+
+class TicketViewSet(
+    mixins.RetrieveModelMixin,
+    BaseViewSet,
+):
+    queryset = Ticket.objects.all()
+    serializer_class = TicketSerializer
+
+    @swagger_auto_schema(
+        operation_summary="티켓 상세 조회 API",
+        manual_parameters=[auth_parameter],
+    )
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return self.get_response(
+            "티켓 상세 정보 조회에 성공했습니다.",
+            serializer.data,
+            status.HTTP_200_OK,
+        )
+
+    @swagger_auto_schema(operation_summary="티켓 예매 API", manual_parameters=[auth_parameter], request_body=no_body)
+    @action(methods=["POST"], detail=True)
+    def reserve(self, request, pk):
+        ticket = Ticket.objects.get(id=pk)
+        ticket.is_sold_out = True
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            box_size=10,
+            border=4,
+        )
+        qr.add_data("https://www.naver.com")
+        qr.make(fit=True)
+
+        img = qr.make_image(fill_color="black", back_color="white")
+        buffer = BytesIO()
+        img.save(buffer, format="PNG")
+        buffer.seek(0)
+
+        ticket.qr_code.save(f"{ticket.id}.png", File(buffer), save=True)
+        ticket.save()
+
+        return self.get_response(
+            "티켓 예매에 성공하였습니다..",
+            {},
             status.HTTP_200_OK,
         )

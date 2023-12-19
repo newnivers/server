@@ -25,9 +25,7 @@ class Art(TimeStampModel):
     title = models.CharField(max_length=31, verbose_name=_("title"))
     image = models.URLField(verbose_name=_("image"))
     genre = models.CharField(max_length=15, verbose_name=_("genre"))
-    category = models.CharField(
-        max_length=15, choices=CategoryChoices.choices, verbose_name=_("category")
-    )
+    category = models.CharField(max_length=15, choices=CategoryChoices.choices, verbose_name=_("category"))
     status = models.CharField(
         max_length=15,
         choices=StatusChoices.choices,
@@ -36,9 +34,7 @@ class Art(TimeStampModel):
     )
     running_time = models.PositiveIntegerField(verbose_name=_("running time"))
     age_limit = models.PositiveIntegerField(default=0, verbose_name=_("age limit"))
-    inter_mission = models.PositiveIntegerField(
-        default=0, verbose_name=_("inter mission")
-    )
+    inter_mission = models.PositiveIntegerField(default=0, verbose_name=_("inter mission"))
     description = models.TextField(verbose_name=_("description"))
     caution_description = models.TextField(verbose_name=_("caution description"))
     cs_phone_number = PhoneNumberField()
@@ -108,9 +104,8 @@ class ArtSchedule(models.Model):
 class Ticket(models.Model):
     art_schedule = models.ForeignKey(
         "arts.ArtSchedule",
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
         related_name="tickets",
-        null=True,
         verbose_name=_("create by"),
     )
     seat = models.ForeignKey(
@@ -120,6 +115,8 @@ class Ticket(models.Model):
         related_name="tickets",
         verbose_name=_("seat"),
     )
+    qr_code = models.ImageField(upload_to="media/qr", default="", blank=True)
+    is_sold_out = models.BooleanField(default=False, verbose_name=_("is sold out"))
 
     class Meta:
         verbose_name = _("ticket")
@@ -127,4 +124,4 @@ class Ticket(models.Model):
         ordering = ["-id"]
 
     def __str__(self):
-        return f"{self.column}{self.row}"
+        return f"{self.seat.column}{self.seat.row}"
