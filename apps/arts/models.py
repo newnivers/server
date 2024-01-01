@@ -125,3 +125,24 @@ class Ticket(models.Model):
 
     def __str__(self):
         return f"{self.seat.column}{self.seat.row}"
+
+
+class Comment(TimeStampModel):
+    author = models.ForeignKey(
+        "users.User",
+        on_delete=models.CASCADE,
+        related_name="comments",
+        verbose_name=_("author"),
+    )
+    art = models.ForeignKey(
+        "arts.Art",
+        on_delete=models.CASCADE,
+        related_name="comments",
+        verbose_name=_("art"),
+    )
+    description = models.TextField(verbose_name=_("description"))
+
+    class Meta:
+        verbose_name = _("comment")
+        verbose_name_plural = _("comments")
+        ordering = ["-id"]

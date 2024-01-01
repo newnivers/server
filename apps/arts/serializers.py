@@ -3,7 +3,7 @@ from django.db.transaction import atomic
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 
-from apps.arts.models import Art, ArtSchedule, Ticket
+from apps.arts.models import Art, ArtSchedule, Ticket, Comment
 
 
 class TicketSerializer(ModelSerializer):
@@ -130,3 +130,13 @@ class ArtSerializer(ModelSerializer):
             representation["place"] = instance.place.name
         representation["schedules"] = ArtScheduleSerializer(instance.schedules.all(), many=True).data
         return representation
+
+
+class CommentSerializer(ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = [
+            'author',
+            'art',
+            'description',
+        ]

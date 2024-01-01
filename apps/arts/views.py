@@ -8,8 +8,8 @@ from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 
 from apps.arts import CategoryChoices, StatusChoices
-from apps.arts.models import Art, Ticket
-from apps.arts.serializers import ArtSerializer, TicketSerializer
+from apps.arts.models import Art, Ticket, Comment
+from apps.arts.serializers import ArtSerializer, TicketSerializer, CommentSerializer
 from apps.arts.swaggers import (
     art_request_body,
     art_response_schema,
@@ -162,3 +162,8 @@ class TicketViewSet(
             {},
             status.HTTP_200_OK,
         )
+
+
+class CommentViewSet(viewsets.ModelViewSet):
+    serializer_class = CommentSerializer
+    queryset = Comment.objects.all()
