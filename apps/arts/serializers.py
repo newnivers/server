@@ -12,6 +12,16 @@ class TicketSerializer(ModelSerializer):
         fields = ["id", "art_schedule", "seat", "qr_code"]
 
 
+class CommentSerializer(ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = [
+            'author',
+            'art',
+            'description',
+        ]
+
+
 class ArtScheduleSerializer(ModelSerializer):
     tickets = TicketSerializer(many=True, read_only=True)
 
@@ -37,6 +47,7 @@ class ArtScheduleSerializer(ModelSerializer):
 
 class ArtSerializer(ModelSerializer):
     schedules = ArtScheduleSerializer(many=True)
+    comments = CommentSerializer(many=True, read_only=True)
 
     class Meta:
         model = Art
@@ -62,6 +73,7 @@ class ArtSerializer(ModelSerializer):
             "purchase_limit_count",
             "price",
             "schedules",
+            "comments",
             "ticket_open_at",
             "ticket_close_at",
             "created_at",
@@ -130,13 +142,3 @@ class ArtSerializer(ModelSerializer):
             representation["place"] = instance.place.name
         representation["schedules"] = ArtScheduleSerializer(instance.schedules.all(), many=True).data
         return representation
-
-
-class CommentSerializer(ModelSerializer):
-    class Meta:
-        model = Comment
-        fields = [
-            'author',
-            'art',
-            'description',
-        ]

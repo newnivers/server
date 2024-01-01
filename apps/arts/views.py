@@ -164,6 +164,10 @@ class TicketViewSet(
         )
 
 
-class CommentViewSet(viewsets.ModelViewSet):
+class CommentViewSet(mixins.CreateModelMixin,
+                     mixins.UpdateModelMixin,
+                     mixins.DestroyModelMixin,
+                     BaseViewSet,):
     serializer_class = CommentSerializer
     queryset = Comment.objects.all()
+    
