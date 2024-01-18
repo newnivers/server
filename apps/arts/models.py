@@ -52,6 +52,7 @@ class Art(TimeStampModel):
     )
     ticket_open_at = models.DateTimeField()
     ticket_close_at = models.DateTimeField()
+    seat_max_count = models.PositiveIntegerField(default=0)
 
     class Meta:
         verbose_name = _("art")
@@ -63,12 +64,12 @@ class Art(TimeStampModel):
 
     @property
     def start_date(self):
-        return min(self.schedules.values_list("start_at", flat=True))
-
+        # return min(self.schedules.values_list("start_at", flat=True))
+        return 'test'
     @property
     def end_date(self):
-        return max(self.schedules.values_list("end_at", flat=True))
-
+        # return max(self.schedules.values_list("end_at", flat=True))
+        return 'test'
 
 class ArtSchedule(models.Model):
     art = models.ForeignKey(
@@ -79,7 +80,6 @@ class ArtSchedule(models.Model):
     )
     start_at = models.DateTimeField(verbose_name=_("start at"))
     end_at = models.DateTimeField(verbose_name=_("end at"))
-    seat_count = models.PositiveIntegerField(verbose_name=_("seat count"))
 
     class Meta:
         verbose_name = _("art schedule")
