@@ -1,3 +1,5 @@
+
+from datetime import datetime, timedelta
 from django.db import IntegrityError
 from django.db.transaction import atomic
 from rest_framework import serializers
@@ -19,6 +21,7 @@ class CommentSerializer(ModelSerializer):
             'author',
             'art',
             'description',
+            'score',
         ]
 
 
@@ -31,7 +34,6 @@ class ArtScheduleSerializer(ModelSerializer):
             "id",
             "start_at",
             "end_at",
-            "seat_count",
             "tickets",
         ]
 
@@ -46,7 +48,7 @@ class ArtScheduleSerializer(ModelSerializer):
 
 
 class ArtSerializer(ModelSerializer):
-    schedules = ArtScheduleSerializer(many=True)
+    schedules = serializers.ListSerializer(child=serializers.CharField())
     comments = CommentSerializer(many=True, read_only=True)
 
     class Meta:
@@ -78,6 +80,7 @@ class ArtSerializer(ModelSerializer):
             "ticket_close_at",
             "created_at",
             "updated_at",
+            'seat_max_count',
         ]
 
     def validate(self, data):
@@ -94,13 +97,33 @@ class ArtSerializer(ModelSerializer):
 
         return super().validate(data)
 
+
     @atomic
     def create(self, validated_data):
         schedules_data = validated_data.pop("schedules", [])
+
         validated_data["user"] = self.context.get("request").user
         art_instance = super().create(validated_data)
-        art_schedules = [ArtSchedule(art=art_instance, **schedule_data) for schedule_data in schedules_data]
         try:
+            art_schedules = [
+                ArtSchedule(
+                    art=art_instance,
+                    start_at=schedule_data,
+                    end_at=datetime.strptime(schedule_data, '%Y-%m-%dT%H:%M:%S.%f%z') + timedelta(minutes=validated_data['running_time']))
+                for schedule_data in schedules_data
+            ]
+        except Exception as e:
+            art_schedules = [
+                ArtSchedule(
+                    art=art_instance,
+                    start_at=schedule_data,
+                    end_at=datetime.strptime(schedule_data, '%Y-%m-%dT%H:%M:%S%z')
+                           + timedelta(minutes=validated_data['running_time']))
+                for schedule_data in schedules_data
+            ]
+
+        try:
+            print(art_instance.place.seats.all())
             art_schedules_data = ArtSchedule.objects.bulk_create(art_schedules)
             tickets = [
                 Ticket(art_schedule=art_schedule, seat=seat, qr_code=None)
@@ -119,7 +142,7 @@ class ArtSerializer(ModelSerializer):
         schedules_data = validated_data.pop("schedules", [])
         validated_data["user"] = self.context.get("request").user
         art_instance = super().update(instance, validated_data)
-        art_schedules = [ArtSchedule(art=art_instance, **schedule_data) for schedule_data in schedules_data]
+        art_schedules = [ArtSchedule(art=art_instance, start_at=schedule_data['start_at']) for schedule_data in schedules_data]
         try:
             art_instance.schedules.all().delete()
             art_schedules_data = ArtSchedule.objects.bulk_create(art_schedules)

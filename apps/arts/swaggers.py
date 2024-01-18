@@ -54,11 +54,11 @@ art_request_body = openapi.Schema(
         "reserved_seat": openapi.Schema(type=openapi.TYPE_BOOLEAN, default=False),
         "purchase_limit_count": openapi.Schema(type=openapi.TYPE_INTEGER, default=1),
         "price": openapi.Schema(type=openapi.TYPE_INTEGER),
-        "schedules": openapi.Schema(
-            type=openapi.TYPE_ARRAY,
-            items=art_schedule_schema,
-            minItems=1,
-        ),
+        # "schedules": openapi.Schema(
+        #     type=openapi.TYPE_ARRAY,
+        #     items=art_schedule_schema,
+        #     minItems=1,
+        # ),
         "ticket_open_at": openapi.Schema(
             type=openapi.TYPE_STRING, format=openapi.FORMAT_DATETIME
         ),

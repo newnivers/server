@@ -37,7 +37,7 @@ class Art(TimeStampModel):
     inter_mission = models.PositiveIntegerField(default=0, verbose_name=_("inter mission"))
     description = models.TextField(verbose_name=_("description"))
     caution_description = models.TextField(verbose_name=_("caution description"))
-    cs_phone_number = PhoneNumberField()
+    cs_phone_number = PhoneNumberField(null=True, blank=True)
     reserved_seat = models.BooleanField(default=False)
     is_free = models.BooleanField(default=False)
     purchase_limit_count = models.PositiveIntegerField(
@@ -52,6 +52,7 @@ class Art(TimeStampModel):
     )
     ticket_open_at = models.DateTimeField()
     ticket_close_at = models.DateTimeField()
+    seat_max_count = models.PositiveIntegerField(default=0)
 
     class Meta:
         verbose_name = _("art")
@@ -64,11 +65,9 @@ class Art(TimeStampModel):
     @property
     def start_date(self):
         return min(self.schedules.values_list("start_at", flat=True))
-
     @property
     def end_date(self):
         return max(self.schedules.values_list("end_at", flat=True))
-
 
 class ArtSchedule(models.Model):
     art = models.ForeignKey(
@@ -79,7 +78,6 @@ class ArtSchedule(models.Model):
     )
     start_at = models.DateTimeField(verbose_name=_("start at"))
     end_at = models.DateTimeField(verbose_name=_("end at"))
-    seat_count = models.PositiveIntegerField(verbose_name=_("seat count"))
 
     class Meta:
         verbose_name = _("art schedule")
@@ -141,6 +139,7 @@ class Comment(TimeStampModel):
         verbose_name=_("art"),
     )
     description = models.TextField(verbose_name=_("description"))
+    score = models.PositiveIntegerField()
 
     class Meta:
         verbose_name = _("comment")

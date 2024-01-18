@@ -23,6 +23,7 @@ class JsonWebTokenMiddleWare(object):
                 and request.path != "/api/users/auth/dev"
                 and request.path != "/api/users/check-nickname"
                 and request.path != "/api/users/test"
+                and request.path != "/api/arts"
                 and "admin" not in request.path
                 and "swagger" not in request.path
                 and "redoc" not in request.path
