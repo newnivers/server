@@ -141,6 +141,7 @@ class Comment(TimeStampModel):
         verbose_name=_("art"),
     )
     description = models.TextField(verbose_name=_("description"))
+    score = models.PositiveIntegerField()
 
     class Meta:
         verbose_name = _("comment")

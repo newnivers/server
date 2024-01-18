@@ -21,6 +21,7 @@ class CommentSerializer(ModelSerializer):
             'author',
             'art',
             'description',
+            'score',
         ]
 
 
@@ -111,13 +112,14 @@ class ArtSerializer(ModelSerializer):
             for schedule_data in schedules_data
         ]
         try:
+            print(art_instance.place.seats.all())
             art_schedules_data = ArtSchedule.objects.bulk_create(art_schedules)
-            # tickets = [
-            #     Ticket(art_schedule=art_schedule, seat=seat, qr_code=None)
-            #     for art_schedule in art_schedules_data
-            #     for seat in art_instance.place.seats.all()
-            # ]
-            # Ticket.objects.bulk_create(tickets)
+            tickets = [
+                Ticket(art_schedule=art_schedule, seat=seat, qr_code=None)
+                for art_schedule in art_schedules_data
+                for seat in art_instance.place.seats.all()
+            ]
+            Ticket.objects.bulk_create(tickets)
         except IntegrityError:
             raise serializers.ValidationError(
                 {"schedules": "중복된 start_at 또는 end_at 값은 입력할 수 없습니다."},
