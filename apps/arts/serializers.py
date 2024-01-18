@@ -104,13 +104,24 @@ class ArtSerializer(ModelSerializer):
 
         validated_data["user"] = self.context.get("request").user
         art_instance = super().create(validated_data)
-        art_schedules = [
-            ArtSchedule(
-                art=art_instance,
-                start_at=schedule_data,
-                end_at=datetime.strptime(schedule_data, '%Y-%m-%dT%H:%M:%S.%f%z') + timedelta(minutes=validated_data['running_time']))
-            for schedule_data in schedules_data
-        ]
+        try:
+            art_schedules = [
+                ArtSchedule(
+                    art=art_instance,
+                    start_at=schedule_data,
+                    end_at=datetime.strptime(schedule_data, '%Y-%m-%dT%H:%M:%S.%f%z') + timedelta(minutes=validated_data['running_time']))
+                for schedule_data in schedules_data
+            ]
+        except Exception as e:
+            art_schedules = [
+                ArtSchedule(
+                    art=art_instance,
+                    start_at=schedule_data,
+                    end_at=datetime.strptime(schedule_data, '%Y-%m-%dT%H:%M:%S%z')
+                           + timedelta(minutes=validated_data['running_time']))
+                for schedule_data in schedules_data
+            ]
+
         try:
             print(art_instance.place.seats.all())
             art_schedules_data = ArtSchedule.objects.bulk_create(art_schedules)
