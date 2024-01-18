@@ -64,12 +64,10 @@ class Art(TimeStampModel):
 
     @property
     def start_date(self):
-        # return min(self.schedules.values_list("start_at", flat=True))
-        return 'test'
+        return min(self.schedules.values_list("start_at", flat=True))
     @property
     def end_date(self):
-        # return max(self.schedules.values_list("end_at", flat=True))
-        return 'test'
+        return max(self.schedules.values_list("end_at", flat=True))
 
 class ArtSchedule(models.Model):
     art = models.ForeignKey(
