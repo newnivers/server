@@ -37,7 +37,7 @@ class Art(TimeStampModel):
     inter_mission = models.PositiveIntegerField(default=0, verbose_name=_("inter mission"))
     description = models.TextField(verbose_name=_("description"))
     caution_description = models.TextField(verbose_name=_("caution description"))
-    cs_phone_number = PhoneNumberField()
+    cs_phone_number = PhoneNumberField(null=True, blank=True)
     reserved_seat = models.BooleanField(default=False)
     is_free = models.BooleanField(default=False)
     purchase_limit_count = models.PositiveIntegerField(

@@ -4,7 +4,7 @@ import qrcode
 from django.core.files import File
 from django.db.models import Q
 from drf_yasg.utils import no_body, swagger_auto_schema
-from rest_framework import mixins, status, viewsets
+from rest_framework import mixins, status
 from rest_framework.decorators import action
 
 from apps.arts import CategoryChoices, StatusChoices
