@@ -69,6 +69,7 @@ class Art(TimeStampModel):
     def end_date(self):
         return max(self.schedules.values_list("end_at", flat=True))
 
+
 class ArtSchedule(models.Model):
     art = models.ForeignKey(
         "arts.Art",
@@ -97,6 +98,10 @@ class ArtSchedule(models.Model):
 
     def __str__(self):
         return f"{self.start_at} - {self.end_at}"
+
+    @property
+    def left_seat_count(self):
+        return self.tickets.filter(is_sold_out=False).count()
 
 
 class Ticket(models.Model):

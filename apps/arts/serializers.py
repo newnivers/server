@@ -26,7 +26,6 @@ class CommentSerializer(ModelSerializer):
 
 
 class ArtScheduleSerializer(ModelSerializer):
-    tickets = TicketSerializer(many=True, read_only=True)
 
     class Meta:
         model = ArtSchedule
@@ -34,7 +33,7 @@ class ArtScheduleSerializer(ModelSerializer):
             "id",
             "start_at",
             "end_at",
-            "tickets",
+            "left_seat_count",
         ]
 
     def validate(self, data):
@@ -109,7 +108,8 @@ class ArtSerializer(ModelSerializer):
                 ArtSchedule(
                     art=art_instance,
                     start_at=schedule_data,
-                    end_at=datetime.strptime(schedule_data, '%Y-%m-%dT%H:%M:%S.%f%z') + timedelta(minutes=validated_data['running_time']))
+                    end_at=datetime.strptime(schedule_data, '%Y-%m-%dT%H:%M:%S.%f%z')
+                           + timedelta(minutes=validated_data['running_time']))
                 for schedule_data in schedules_data
             ]
         except Exception as e:
@@ -123,7 +123,6 @@ class ArtSerializer(ModelSerializer):
             ]
 
         try:
-            print(art_instance.place.seats.all())
             art_schedules_data = ArtSchedule.objects.bulk_create(art_schedules)
             tickets = [
                 Ticket(art_schedule=art_schedule, seat=seat, qr_code=None)
