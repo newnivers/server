@@ -32,7 +32,6 @@ class ArtScheduleSerializer(ModelSerializer):
         fields = [
             "id",
             "start_at",
-            "end_at",
             "left_seat_count",
         ]
 
@@ -124,11 +123,18 @@ class ArtSerializer(ModelSerializer):
 
         try:
             art_schedules_data = ArtSchedule.objects.bulk_create(art_schedules)
-            tickets = [
-                Ticket(art_schedule=art_schedule, seat=seat, qr_code=None)
-                for art_schedule in art_schedules_data
-                for seat in art_instance.place.seats.all()
-            ]
+            if art_instance.place.is_reserved_seat:
+                tickets = [
+                    Ticket(art_schedule=art_schedule, seat=seat, qr_code=None)
+                    for art_schedule in art_schedules_data
+                    for seat in art_instance.place.seats.all()
+                ]
+            else:
+                tickets = [
+                    Ticket(art_schedule=art_schedule, seat=None, qr_code=None)
+                    for art_schedule in art_schedules_data
+                    for i in range(1, int(art_instance.seat_max_count))
+                ]
             Ticket.objects.bulk_create(tickets)
         except IntegrityError:
             raise serializers.ValidationError(
@@ -162,5 +168,5 @@ class ArtSerializer(ModelSerializer):
         place = representation.get("place", None)
         if place:
             representation["place"] = instance.place.name
-        representation["schedules"] = ArtScheduleSerializer(instance.schedules.all(), many=True).data
+        representation["schedules"] = ArtScheduleSerializer(instance.schedules.all().order_by("start_at"), many=True).data
         return representation
