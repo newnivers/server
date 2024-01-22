@@ -53,6 +53,7 @@ class Art(TimeStampModel):
     ticket_open_at = models.DateTimeField()
     ticket_close_at = models.DateTimeField()
     seat_max_count = models.PositiveIntegerField(default=0)
+    hit_count = models.PositiveIntegerField(default=0)
 
     class Meta:
         verbose_name = _("art")

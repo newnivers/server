@@ -140,3 +140,11 @@ art_response_schema = openapi.Schema(
         ),
     },
 )
+
+section_parameter = openapi.Parameter(
+    name="section",
+    in_=openapi.IN_QUERY,
+    description="Section for filtering.",
+    required=False,
+    type=openapi.TYPE_STRING,
+)

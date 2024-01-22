@@ -154,6 +154,8 @@ REST_FRAMEWORK = {
         "config.authentications.JsonWebTokenAuthentication",
         "rest_framework.authentication.SessionAuthentication",
     ],
+    'DEFAULT_PAGINATION_CLASS' : 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE' : 11,
 }
 
 # NAVER
@@ -163,3 +165,14 @@ NAVER_CLIENT_SECRET = env("NAVER_CLIENT_SECRET")
 
 # DJANGO-MONEY
 CURRENCIES = ("KRW",)
+
+# DJANGO-CACHE
+CACHE = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",
+        "OPTION": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}

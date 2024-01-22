@@ -79,6 +79,7 @@ class ArtSerializer(ModelSerializer):
             "created_at",
             "updated_at",
             'seat_max_count',
+            'hit_count',
         ]
 
     def validate(self, data):

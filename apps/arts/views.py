@@ -1,8 +1,10 @@
 from io import BytesIO
 
 import qrcode
+from django.core.cache import cache
 from django.core.files import File
 from django.db.models import Q
+from django.utils import timezone
 from drf_yasg.utils import no_body, swagger_auto_schema
 from rest_framework import mixins, status
 from rest_framework.decorators import action
@@ -13,9 +15,11 @@ from apps.arts.serializers import ArtSerializer, TicketSerializer, CommentSerial
 from apps.arts.swaggers import (
     art_request_body,
     art_response_schema,
-    categories_responses,
+    categories_responses, section_parameter,
 )
+from apps.arts.utils import check_valid_ip_for_hit_count
 from apps.core.swaggers import auth_parameter, end_date_parameter, start_date_parameter
+from apps.core.utils import get_client_ip
 from apps.core.views import BaseViewSet
 
 
@@ -41,7 +45,6 @@ class ArtViewSet(
                 q &= Q(created_at__lte=end_date)
 
         q &= Q(status=StatusChoices.APPROVED)
-
         return Art.objects.filter(q)
 
     @swagger_auto_schema(
@@ -50,18 +53,38 @@ class ArtViewSet(
             auth_parameter,
             start_date_parameter,
             end_date_parameter,
+            section_parameter,
         ],
     )
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
+        section = self.request.query_params.get('section', None)
 
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
 
-        serializer = self.get_serializer(queryset, many=True)
-        return self.get_response("작품 리스트 조회에 성공했습니다.", serializer.data, status.HTTP_200_OK)
+        if not section or section == 'Home':
+            hot_ranking = queryset.order_by('-hit_count')[:3]
+            ticket_open = queryset.filter(ticket_open_at__gte=timezone.now()).order_by('-ticket_open_at')
+
+            hot_ranking_page = self.paginate_queryset(hot_ranking)
+            ticket_open_page = self.paginate_queryset(ticket_open)
+
+            # if hot_ranking_page is not None:
+            #     hot_ranking_serializer = self.get_serializer(hot_ranking_page, many=True)
+            #     return self.get_paginated_response(hot_ranking_serializer.data)
+            #
+            # if ticket_open_page is not None:
+            #     ticket_open_page_serializer = self.get_serializer(ticket_open_page, many=True)
+            #     return self.get_paginated_response(ticket_open_page_serializer.data)
+
+            hot_ranking_serializer = self.get_serializer(hot_ranking_page, many=True)
+            ticket_open_page_serializer = self.get_serializer(ticket_open_page, many=True)
+
+            results = {
+                'hot_ranking': hot_ranking_serializer.data,
+                'ticket_open': ticket_open_page_serializer.data,
+            }
+
+        return self.get_response("작품 리스트 조회에 성공했습니다.", results, status.HTTP_200_OK)
 
     @swagger_auto_schema(
         operation_summary="작품 상세 조회 API",
@@ -69,6 +92,10 @@ class ArtViewSet(
     )
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
+        if not check_valid_ip_for_hit_count(request):
+            instance.hit_count += 1
+            instance.save()
+            cache.set(get_client_ip(request), 1, 60 * 60 * 24)
         serializer = self.get_serializer(instance)
         return self.get_response("작품 상세 정보 조회에 성공했습니다.", serializer.data, status.HTTP_200_OK)
 
