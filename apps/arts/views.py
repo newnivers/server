@@ -50,7 +50,6 @@ class ArtViewSet(
     @swagger_auto_schema(
         operation_summary="작품 리스트 조회 API",
         manual_parameters=[
-            auth_parameter,
             start_date_parameter,
             end_date_parameter,
             section_parameter,
@@ -88,7 +87,7 @@ class ArtViewSet(
 
     @swagger_auto_schema(
         operation_summary="작품 상세 조회 API",
-        manual_parameters=[auth_parameter],
+        manual_parameters=[],
     )
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
