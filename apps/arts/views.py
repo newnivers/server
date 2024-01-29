@@ -67,14 +67,6 @@ class ArtViewSet(
             hot_ranking_page = self.paginate_queryset(hot_ranking)
             ticket_open_page = self.paginate_queryset(ticket_open)
 
-            # if hot_ranking_page is not None:
-            #     hot_ranking_serializer = self.get_serializer(hot_ranking_page, many=True)
-            #     return self.get_paginated_response(hot_ranking_serializer.data)
-            #
-            # if ticket_open_page is not None:
-            #     ticket_open_page_serializer = self.get_serializer(ticket_open_page, many=True)
-            #     return self.get_paginated_response(ticket_open_page_serializer.data)
-
             hot_ranking_serializer = self.get_serializer(hot_ranking_page, many=True)
             ticket_open_page_serializer = self.get_serializer(ticket_open_page, many=True)
 

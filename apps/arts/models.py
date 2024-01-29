@@ -110,7 +110,7 @@ class Ticket(models.Model):
         "arts.ArtSchedule",
         on_delete=models.CASCADE,
         related_name="tickets",
-        verbose_name=_("create by"),
+        verbose_name=_("art schedule"),
     )
     seat = models.ForeignKey(
         "places.Seat",
