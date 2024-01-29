@@ -6,6 +6,7 @@ from apps.core.models import TimeStampModel
 
 class Place(TimeStampModel):
     name = models.CharField(max_length=31, verbose_name=_("name"))
+    is_reserved_seat = models.BooleanField(default=True)
 
     class Meta:
         verbose_name = _("place")

@@ -1,4 +1,5 @@
 import logging
+import re
 from datetime import datetime
 
 from django.http import JsonResponse
@@ -24,6 +25,7 @@ class JsonWebTokenMiddleWare(object):
                 and request.path != "/api/users/check-nickname"
                 and request.path != "/api/users/test"
                 and request.path != "/api/arts"
+                and not re.compile(r'^/api/arts/\d+$')
                 and "admin" not in request.path
                 and "swagger" not in request.path
                 and "redoc" not in request.path

@@ -26,15 +26,13 @@ class CommentSerializer(ModelSerializer):
 
 
 class ArtScheduleSerializer(ModelSerializer):
-    tickets = TicketSerializer(many=True, read_only=True)
 
     class Meta:
         model = ArtSchedule
         fields = [
             "id",
             "start_at",
-            "end_at",
-            "tickets",
+            "left_seat_count",
         ]
 
     def validate(self, data):
@@ -81,6 +79,7 @@ class ArtSerializer(ModelSerializer):
             "created_at",
             "updated_at",
             'seat_max_count',
+            'hit_count',
         ]
 
     def validate(self, data):
@@ -109,7 +108,8 @@ class ArtSerializer(ModelSerializer):
                 ArtSchedule(
                     art=art_instance,
                     start_at=schedule_data,
-                    end_at=datetime.strptime(schedule_data, '%Y-%m-%dT%H:%M:%S.%f%z') + timedelta(minutes=validated_data['running_time']))
+                    end_at=datetime.strptime(schedule_data, '%Y-%m-%dT%H:%M:%S.%f%z')
+                           + timedelta(minutes=validated_data['running_time']))
                 for schedule_data in schedules_data
             ]
         except Exception as e:
@@ -123,13 +123,19 @@ class ArtSerializer(ModelSerializer):
             ]
 
         try:
-            print(art_instance.place.seats.all())
             art_schedules_data = ArtSchedule.objects.bulk_create(art_schedules)
-            tickets = [
-                Ticket(art_schedule=art_schedule, seat=seat, qr_code=None)
-                for art_schedule in art_schedules_data
-                for seat in art_instance.place.seats.all()
-            ]
+            if art_instance.place.is_reserved_seat:
+                tickets = [
+                    Ticket(art_schedule=art_schedule, seat=seat, qr_code=None)
+                    for art_schedule in art_schedules_data
+                    for seat in art_instance.place.seats.all()
+                ]
+            else:
+                tickets = [
+                    Ticket(art_schedule=art_schedule, seat=None, qr_code=None)
+                    for art_schedule in art_schedules_data
+                    for i in range(1, int(art_instance.seat_max_count))
+                ]
             Ticket.objects.bulk_create(tickets)
         except IntegrityError:
             raise serializers.ValidationError(
@@ -163,5 +169,5 @@ class ArtSerializer(ModelSerializer):
         place = representation.get("place", None)
         if place:
             representation["place"] = instance.place.name
-        representation["schedules"] = ArtScheduleSerializer(instance.schedules.all(), many=True).data
+        representation["schedules"] = ArtScheduleSerializer(instance.schedules.all().order_by("start_at"), many=True).data
         return representation
