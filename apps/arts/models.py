@@ -119,6 +119,14 @@ class Ticket(models.Model):
         related_name="tickets",
         verbose_name=_("seat"),
     )
+    user = models.ForeignKey(
+        'users.User',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="tickets",
+        verbose_name=_("user"),
+    )
     qr_code = models.ImageField(upload_to="media/qr", default="", blank=True)
     is_sold_out = models.BooleanField(default=False, verbose_name=_("is sold out"))
 

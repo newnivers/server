@@ -6,6 +6,10 @@ extend-exclude = '''
 )/
 '''
 
+[tool.flake8]
+exclude
+max-line-length = 120
+
 [tool.poetry]
 name = "newniverse"
 version = "0.1.0"

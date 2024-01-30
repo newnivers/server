@@ -8,14 +8,15 @@ from django.utils import timezone
 from drf_yasg.utils import no_body, swagger_auto_schema
 from rest_framework import mixins, status
 from rest_framework.decorators import action
+from rest_framework.response import Response
 
 from apps.arts import CategoryChoices, StatusChoices
-from apps.arts.models import Art, Ticket, Comment
-from apps.arts.serializers import ArtSerializer, TicketSerializer, CommentSerializer
+from apps.arts.models import Art, Ticket, Comment, ArtSchedule
+from apps.arts.serializers import ArtSerializer, TicketSerializer, CommentSerializer, ArtScheduleSerializer
 from apps.arts.swaggers import (
     art_request_body,
     art_response_schema,
-    categories_responses, section_parameter,
+    categories_responses, section_parameter, reserve_schema,
 )
 from apps.arts.utils import check_valid_ip_for_hit_count
 from apps.core.swaggers import auth_parameter, end_date_parameter, start_date_parameter
@@ -129,6 +130,48 @@ class ArtViewSet(
         return self.get_response(
             "작품 카테고리 리스트 조회에 성공했습니다.",
             {"categories": CategoryChoices.values},
+            status.HTTP_200_OK,
+        )
+
+
+class ArtScheduleViewSet(
+    BaseViewSet,
+):
+    queryset = ArtSchedule
+    serializer_class = ArtScheduleSerializer
+
+    @swagger_auto_schema(
+        operation_summary= "티켓 예약 API",
+        manual_parameters=[auth_parameter],
+        request_body=reserve_schema,
+    )
+    @action(methods=["POST"], detail=True)
+    def reserve_tickets(self, request, pk):
+        quantity = request.data.get('quantity', 1)
+        tickets = Ticket.objects.filter(art_schedule__id=pk, is_sold_out=False)[:quantity]
+
+        for ticket in tickets:
+            ticket.is_sold_out = True
+            ticket.user = request.user
+            qr = qrcode.QRCode(
+                version=1,
+                error_correction=qrcode.constants.ERROR_CORRECT_L,
+                box_size=10,
+                border=4,
+            )
+            qr.add_data("https://www.naver.com")
+            qr.make(fit=True)
+
+            img = qr.make_image(fill_color="black", back_color="white")
+            buffer = BytesIO()
+            img.save(buffer, format="PNG")
+            buffer.seek(0)
+
+            ticket.qr_code.save(f"{ticket.id}.png", File(buffer), save=True)
+            ticket.save()
+        return self.get_response(
+            "티켓 예약에 성공했습니다.",
+            {},
             status.HTTP_200_OK,
         )
 

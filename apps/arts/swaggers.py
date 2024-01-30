@@ -29,6 +29,17 @@ art_schedule_schema = openapi.Schema(
     required=["start_at", "end_at", "seat_count"],
 )
 
+
+reserve_schema = openapi.Schema(
+    type=openapi.TYPE_OBJECT,
+    properties={
+        "quantity": openapi.Schema(
+            type=openapi.TYPE_INTEGER, format=openapi.TYPE_INTEGER
+        ),
+    },
+    required=["quantity"],
+)
+
 art_request_body = openapi.Schema(
     type=openapi.TYPE_OBJECT,
     properties={
