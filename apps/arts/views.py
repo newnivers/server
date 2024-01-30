@@ -150,6 +150,13 @@ class ArtScheduleViewSet(
         quantity = request.data.get('quantity', 1)
         tickets = Ticket.objects.filter(art_schedule__id=pk, is_sold_out=False)[:quantity]
 
+        if len(tickets) != quantity:
+            return self.get_response(
+            "티켓 예약에 실패했습니다.",
+            {},
+            status.HTTP_400_BAD_REQUEST,
+        )
+
         for ticket in tickets:
             ticket.is_sold_out = True
             ticket.user = request.user
