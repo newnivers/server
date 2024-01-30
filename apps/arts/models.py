@@ -132,9 +132,6 @@ class Ticket(models.Model):
         verbose_name_plural = _("tickets")
         ordering = ["-id"]
 
-    def __str__(self):
-        return f"{self.seat.column}{self.seat.row}"
-
 
 class Comment(TimeStampModel):
     author = models.ForeignKey(
