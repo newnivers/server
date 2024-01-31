@@ -9,7 +9,6 @@ from drf_yasg import openapi
 from drf_yasg.utils import no_body, swagger_auto_schema
 from rest_framework import mixins, status
 from rest_framework.decorators import action
-from rest_framework.response import Response
 
 from apps.arts import CategoryChoices, StatusChoices
 from apps.arts.models import Art, Ticket, Comment, ArtSchedule

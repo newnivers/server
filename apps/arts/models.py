@@ -105,6 +105,10 @@ class ArtSchedule(models.Model):
     def left_seat_count(self):
         return self.tickets.filter(is_sold_out=False).count()
 
+    @property
+    def seat_max_count(self):
+        return self.art.seat_max_count
+
 
 class Ticket(models.Model):
     art_schedule = models.ForeignKey(

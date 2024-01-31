@@ -177,6 +177,16 @@ class ArtSerializer(ModelSerializer):
         return representation
 
 
+class LestSeatSerializer(ModelSerializer):
+    class Meta:
+        model = ArtSchedule
+        fields = [
+            'id',
+            'left_seat_count',
+            'seat_max_count',
+        ]
+
+
 class CheckListSerializer(ModelSerializer):
     class Meta:
         model = Art
@@ -188,3 +198,8 @@ class CheckListSerializer(ModelSerializer):
             "status",
             "created_by",
         ]
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation["schedules"] = LestSeatSerializer(instance.schedules.all().order_by("start_at"), many=True).data
+        return representation
