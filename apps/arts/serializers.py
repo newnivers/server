@@ -171,3 +171,16 @@ class ArtSerializer(ModelSerializer):
             representation["place"] = instance.place.name
         representation["schedules"] = ArtScheduleSerializer(instance.schedules.all().order_by("start_at"), many=True).data
         return representation
+
+
+class CheckListSerializer(ModelSerializer):
+    class Meta:
+        model = Art
+        fields = [
+            "id",
+            "created_at",
+            "genre",
+            "title",
+            "status",
+            "created_by",
+        ]

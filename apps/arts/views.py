@@ -5,6 +5,7 @@ from django.core.cache import cache
 from django.core.files import File
 from django.db.models import Q
 from django.utils import timezone
+from drf_yasg import openapi
 from drf_yasg.utils import no_body, swagger_auto_schema
 from rest_framework import mixins, status
 from rest_framework.decorators import action
@@ -12,7 +13,8 @@ from rest_framework.response import Response
 
 from apps.arts import CategoryChoices, StatusChoices
 from apps.arts.models import Art, Ticket, Comment, ArtSchedule
-from apps.arts.serializers import ArtSerializer, TicketSerializer, CommentSerializer, ArtScheduleSerializer
+from apps.arts.serializers import ArtSerializer, TicketSerializer, CommentSerializer, ArtScheduleSerializer, \
+    CheckListSerializer
 from apps.arts.swaggers import (
     art_request_body,
     art_response_schema,
@@ -31,7 +33,11 @@ class ArtViewSet(
     mixins.CreateModelMixin,
     BaseViewSet,
 ):
-    serializer_class = ArtSerializer
+
+    def get_serializer_class(self):
+        if self.action == "check_list":
+            return CheckListSerializer
+        return ArtSerializer
 
     def get_queryset(self):
         q = Q()
@@ -44,6 +50,9 @@ class ArtViewSet(
                 q &= Q(created_at__gte=start_date)
             if end_date:
                 q &= Q(created_at__lte=end_date)
+
+        elif self.action == 'check_list':
+            q &= Q(user=self.request.user)
 
         q &= Q(status=StatusChoices.APPROVED)
         return Art.objects.filter(q)
@@ -130,6 +139,26 @@ class ArtViewSet(
         return self.get_response(
             "작품 카테고리 리스트 조회에 성공했습니다.",
             {"categories": CategoryChoices.values},
+            status.HTTP_200_OK,
+        )
+
+    @swagger_auto_schema(
+        operation_summary="등록 확인 리스트 API",
+        manual_parameters=[auth_parameter],
+        responses={
+            200: openapi.Response(
+                description="Success",
+                schema=CheckListSerializer,
+            ),
+        },
+    )
+    @action(methods=["GET"], detail=False, url_path='check-list')
+    def check_list(self, request):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        return self.get_response(
+            "작품 카테고리 리스트 조회에 성공했습니다.",
+            serializer.data,
             status.HTTP_200_OK,
         )
 

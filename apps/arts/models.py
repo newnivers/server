@@ -64,6 +64,10 @@ class Art(TimeStampModel):
         return self.title
 
     @property
+    def created_by(self):
+        return self.user.nickname
+
+    @property
     def start_date(self):
         return min(self.schedules.values_list("start_at", flat=True))
     @property
