@@ -157,7 +157,7 @@ class ArtViewSet(
         queryset = self.get_queryset()
         serializer = self.get_serializer(queryset, many=True)
         return self.get_response(
-            "작품 카테고리 리스트 조회에 성공했습니다.",
+            "등록확인 리스트 페이지 조회에 성공했습니다..",
             serializer.data,
             status.HTTP_200_OK,
         )
