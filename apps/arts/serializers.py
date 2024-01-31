@@ -24,6 +24,10 @@ class CommentSerializer(ModelSerializer):
             'score',
         ]
 
+    def create(self, validated_data):
+        validated_data["author"] = self.context.get("request").user
+        return super().create(validated_data)
+
 
 class ArtScheduleSerializer(ModelSerializer):
 

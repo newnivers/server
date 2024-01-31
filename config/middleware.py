@@ -25,6 +25,7 @@ class JsonWebTokenMiddleWare(object):
                 and request.path != "/api/users/check-nickname"
                 and request.path != "/api/users/test"
                 and request.path != "/api/arts"
+                and request.path != "/api/arts/home"
                 and not re.compile(r'^/api/arts/\d+$')
                 and "admin" not in request.path
                 and "swagger" not in request.path

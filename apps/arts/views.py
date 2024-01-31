@@ -88,6 +88,35 @@ class ArtViewSet(
         return self.get_response("작품 리스트 조회에 성공했습니다.", results, status.HTTP_200_OK)
 
     @swagger_auto_schema(
+        operation_summary="랜딩페이지-Home API",
+        manual_parameters=[],
+        responses={
+            200: openapi.Response(
+                description="Success",
+                schema=ArtSerializer,
+            ),
+        },
+    )
+    @action(methods=["GET"], detail=False)
+    def home(self, request):
+        queryset = self.filter_queryset(self.get_queryset())
+        section = self.request.query_params.get('section', None)
+
+        if not section or section == 'Home':
+            hot_ranking = queryset.order_by('-hit_count')[:3]
+            ticket_open = queryset.filter(ticket_open_at__gte=timezone.now()).order_by('-ticket_open_at')
+
+            hot_ranking_serializer = self.get_serializer(hot_ranking, many=True)
+            ticket_open_page_serializer = self.get_serializer(ticket_open, many=True)
+
+            results = {
+                'hot_ranking': hot_ranking_serializer.data,
+                'ticket_open': ticket_open_page_serializer.data,
+            }
+
+        return self.get_response("작품 리스트 조회에 성공했습니다.", results, status.HTTP_200_OK)
+
+    @swagger_auto_schema(
         operation_summary="작품 상세 조회 API",
         manual_parameters=[],
     )
