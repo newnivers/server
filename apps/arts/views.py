@@ -51,7 +51,7 @@ class ArtViewSet(
                 q &= Q(created_at__lte=end_date)
 
         elif self.action == 'check_list':
-            q &= Q(user=self.request.user)
+            return Art.objects.filter(user=self.request.user)
 
         q &= Q(status=StatusChoices.APPROVED)
         return Art.objects.filter(q)
