@@ -223,7 +223,7 @@ class ArtScheduleViewSet(
                 box_size=10,
                 border=4,
             )
-            qr.add_data("https://www.naver.com")
+            qr.add_data(f"https://newnivers.vercel.app/tickets/{ticket.id}")
             qr.make(fit=True)
 
             img = qr.make_image(fill_color="black", back_color="white")

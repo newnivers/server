@@ -11,7 +11,15 @@ from apps.arts.models import Art, ArtSchedule, Ticket, Comment
 class TicketSerializer(ModelSerializer):
     class Meta:
         model = Ticket
-        fields = ["id", "art_schedule", "seat", "qr_code"]
+        fields = [
+            "id",
+            "art_schedule_date",
+            "art_title",
+            "place",
+            "nickname",
+            "art_thumbnail",
+            "qr_code",
+        ]
 
 
 class CommentSerializer(ModelSerializer):

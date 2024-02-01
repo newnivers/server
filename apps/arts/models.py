@@ -140,6 +140,26 @@ class Ticket(models.Model):
         verbose_name_plural = _("tickets")
         ordering = ["-id"]
 
+    @property
+    def art_title(self):
+        return self.art_schedule.art.title
+
+    @property
+    def place(self):
+        return self.art_schedule.art.place.name
+
+    @property
+    def nickname(self):
+        return self.user.nickname
+
+    @property
+    def art_schedule_date(self):
+        return self.art_schedule.start_at
+
+    @property
+    def art_thumbnail(self):
+        return self.art_schedule.art.image
+
 
 class Comment(TimeStampModel):
     author = models.ForeignKey(
