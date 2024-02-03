@@ -32,6 +32,7 @@ class ReviewSerializer(ModelSerializer):
         fields = (
             "id",
             "nickname",
+            "description",
             "art_title",
             "art_thumbnail",
             "place",
