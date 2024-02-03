@@ -154,8 +154,6 @@ REST_FRAMEWORK = {
         "config.authentications.JsonWebTokenAuthentication",
         "rest_framework.authentication.SessionAuthentication",
     ],
-    'DEFAULT_PAGINATION_CLASS' : 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE' : 11,
 }
 
 # NAVER
