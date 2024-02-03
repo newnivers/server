@@ -160,6 +160,10 @@ class Ticket(models.Model):
     def art_thumbnail(self):
         return self.art_schedule.art.image
 
+    @property
+    def start_at(self):
+        return self.art_schedule.start_at
+
 
 class Comment(TimeStampModel):
     author = models.ForeignKey(

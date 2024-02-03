@@ -16,7 +16,8 @@ class PurchaseSerializer(ModelSerializer):
             "art_title",
             "art_thumbnail",
             "place",
-            "visitor_count"
+            "visitor_count",
+            "start_at",
         )
 
     def get_visitor_count(self, obj):
