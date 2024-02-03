@@ -181,3 +181,19 @@ class Comment(TimeStampModel):
         verbose_name = _("comment")
         verbose_name_plural = _("comments")
         ordering = ["-id"]
+
+    @property
+    def art_title(self):
+        return self.art.title
+
+    @property
+    def place(self):
+        return self.art.place.name
+
+    @property
+    def nickname(self):
+        return self.user.nickname
+
+    @property
+    def art_thumbnail(self):
+        return self.art.image
